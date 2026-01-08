@@ -1,5 +1,21 @@
--- VLC Media Player script to automatically skip intervals in videos
--- Place this file in VLC's lua/extensions directory
+-- Skip Intervals VLC Extension
+-- This script automatically skips predefined time intervals in videos
+--
+-- USAGE INSTRUCTIONS:
+-- 1. Place this file in VLC's extensions directory:
+--    * Windows: %APPDATA%\vlc\lua\extensions\
+--    * Linux: ~/.local/share/vlc/lua/extensions/
+--    * macOS: ~/Library/Application Support/org.videolan.vlc/lua/extensions/
+-- 2. Restart VLC media player
+-- 3. The extension will appear in the "Extensions" menu as "Skip Intervals"
+-- 4. Configure your skip rules in the skip_rules table below
+-- 5. Play your videos with the extension enabled
+--
+-- CONFIGURATION:
+-- Edit the skip_rules table below to define which files have intervals to skip
+-- Format: ["filename"] = { {"HH:MM:SS", duration_seconds}, ... }
+-- Example: ["movie.mp4"] = { {"00:01:30", 60}, {"00:05:15", 30} }
+-- This will skip from 1:30 to 2:30 and from 5:15 to 5:45 in movie.mp4
 
 -- Define the extension metadata
 function descriptor()
