@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Видеоплеер</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: black;
+            overflow: hidden;
+        }
+        
+        #videoContainer {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+        
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        
+        #controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px;
+            border-radius: 5px;
+            color: white;
+            display: none;
+        }
+        
+        #controls.visible {
+            display: block;
+        }
+        
+        #currentTime {
+            color: white;
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            z-index: 100;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 5px 10px;
+            border-radius: 3px;
+            font-family: monospace;
+        }
+        
+        /* Режим clean - без отступов и курсора */
+        body.clean {
+            margin: 0 !important;
+            overflow: hidden !important;
+        }
+        
+        body.clean * {
+            cursor: none !important;
+        }
+    </style>
+</head>
+<body>
+    <div id="videoContainer">
+        <video id="videoPlayer" muted autoplay playsinline></video>
+    </div>
+    
+    <div id="currentTime">00:00 / 00:00</div>
+    
+    <div id="controls">
+        <button id="playPauseBtn">Пауза</button>
+        <button id="muteBtn">Без звука</button>
+        <input type="range" id="volumeSlider" min="0" max="1" step="0.1" value="1">
+        <button id="showControlsBtn" title="Показать/скрыть интерфейс (H)">H</button>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let videoPlayer = document.getElementById('videoPlayer');
+        let skipRules = [];
+        let isCleanMode = false;
+        let controlsVisible = false;
+        let hideControlsTimeout;
+        let checkInterval;
+        
+        // DOM элементы
+        const currentTimeEl = document.getElementById('currentTime');
+        const controlsEl = document.getElementById('controls');
+        const playPauseBtn = document.getElementById('playPauseBtn');
+        const muteBtn = document.getElementById('muteBtn');
+        const volumeSlider = document.getElementById('volumeSlider');
+        const showControlsBtn = document.getElementById('showControlsBtn');
+        
+        // Проверяем параметры URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const cleanParam = urlParams.get('clean');
+        const dataParam = urlParams.get('data');
+        
+        // Режим clean
+        isCleanMode = cleanParam === '1';
+        if (isCleanMode) {
+            document.body.classList.add('clean');
+        }
+        
+        // Загружаем данные из параметров
+        if (dataParam) {
+            try {
+                const videoData = JSON.parse(decodeURIComponent(dataParam));
+                loadVideo(videoData.url, videoData.skipRules || []);
+            } catch (e) {
+                console.error('Ошибка разбора данных:', e);
+            }
+        }
+        
+        // Загрузка видео
+        function loadVideo(src, rules) {
+            videoPlayer.src = src;
+            skipRules = rules || [];
+            
+            videoPlayer.load();
+            videoPlayer.play().catch(e => {
+                console.warn('Автовоспроизведение заблокировано:', e);
+            });
+        }
+        
+        // Проверка необходимости пропуска
+        function checkSkip() {
+            if (!videoPlayer || skipRules.length === 0) return;
+            
+            const currentTime = videoPlayer.currentTime;
+            
+            for (const [start, end] of skipRules) {
+                if (currentTime >= start && currentTime < end) {
+                    console.log(`Пропуск с ${start} до ${end}, текущее время: ${currentTime}`);
+                    videoPlayer.currentTime = end;
+                    break;
+                }
+            }
+        }
+        
+        // Обновление отображения времени
+        function updateTimeDisplay() {
+            if (!videoPlayer) return;
+            
+            const current = formatTime(videoPlayer.currentTime);
+            const duration = formatTime(videoPlayer.duration);
+            currentTimeEl.textContent = `${current} / ${duration}`;
+        }
+        
+        // Форматирование времени
+        function formatTime(seconds) {
+            if (isNaN(seconds)) return '00:00';
+            
+            const mins = Math.floor(seconds / 60);
+            const secs = Math.floor(seconds % 60);
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+        
+        // Переключение видимости элементов управления
+        function toggleControls() {
+            if (isCleanMode) return; // В режиме clean управление не показываем
+            
+            controlsVisible = !controlsVisible;
+            controlsEl.classList.toggle('visible', controlsVisible);
+            
+            // Сброс таймера скрытия
+            clearTimeout(hideControlsTimeout);
+            
+            if (controlsVisible) {
+                // Автоматически скрыть через 5 секунд бездействия
+                hideControlsTimeout = setTimeout(() => {
+                    controlsVisible = false;
+                    controlsEl.classList.remove('visible');
+                }, 5000);
+            }
+        }
+        
+        // Обработчики событий
+        videoPlayer.addEventListener('loadedmetadata', () => {
+            updateTimeDisplay();
+        });
+        
+        videoPlayer.addEventListener('timeupdate', () => {
+            updateTimeDisplay();
+            checkSkip();
+        });
+        
+        playPauseBtn.addEventListener('click', () => {
+            if (videoPlayer.paused) {
+                videoPlayer.play();
+                playPauseBtn.textContent = 'Пауза';
+            } else {
+                videoPlayer.pause();
+                playPauseBtn.textContent = 'Воспр.';
+            }
+        });
+        
+        muteBtn.addEventListener('click', () => {
+            videoPlayer.muted = !videoPlayer.muted;
+            muteBtn.textContent = videoPlayer.muted ? 'Со звуком' : 'Без звука';
+        });
+        
+        volumeSlider.addEventListener('input', () => {
+            videoPlayer.volume = volumeSlider.value;
+        });
+        
+        showControlsBtn.addEventListener('click', toggleControls);
+        
+        // Показ/скрытие управления по нажатию H
+        document.addEventListener('keydown', (e) => {
+            if (e.key.toLowerCase() === 'h') {
+                toggleControls();
+            }
+        });
+        
+        // Показ управления при движении мыши (если в обычном режиме)
+        if (!isCleanMode) {
+            document.addEventListener('mousemove', () => {
+                if (!controlsVisible) {
+                    toggleControls();
+                } else {
+                    // Продлеваем показ управления
+                    clearTimeout(hideControlsTimeout);
+                    hideControlsTimeout = setTimeout(() => {
+                        controlsVisible = false;
+                        controlsEl.classList.remove('visible');
+                    }, 3000);
+                }
+            });
+        }
+        
+        // Предотвращение закрытия окна
+        window.addEventListener('beforeunload', (e) => {
+            e.preventDefault();
+            e.returnValue = 'Внимание: при закрытии этого окна воспроизведение остановится и стрим прервётся. Оставьте окно открытым для продолжения трансляции.';
+        });
+        
+        // Обработка сообщений от главной страницы
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'getCurrentTime') {
+                // Отправляем текущее время обратно
+                window.opener.postMessage({
+                    type: 'currentTime',
+                    currentTime: videoPlayer.currentTime
+                }, '*');
+            }
+        });
+        
+        // Запуск проверки пропусков
+        checkInterval = setInterval(checkSkip, 200); // Проверяем каждые 200мс
+        
+        // При загрузке страницы запускаем автовоспроизведение
+        window.addEventListener('load', () => {
+            videoPlayer.muted = true;
+            videoPlayer.play().catch(e => {
+                console.warn('Автовоспроизведение заблокировано:', e);
+            });
+        });
+    </script>
+</body>
+</html>
