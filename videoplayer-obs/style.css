@@ -1,0 +1,269 @@
+/* Сброс стилей */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+    padding: 20px;
+    overflow: auto;
+}
+
+/* Режим OBS - скрытие лишних элементов */
+body[data-obs-mode="true"] {
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+}
+
+#video-container {
+    position: relative;
+    width: 100%;
+    max-width: 100vw;
+    max-height: 100vh;
+}
+
+#video-player {
+    width: 100%;
+    height: 80vh;
+    background-color: black;
+    object-fit: contain;
+}
+
+body[data-obs-mode="true"] #video-player {
+    width: 100vw !important;
+    height: 100vh !important;
+    margin: 0;
+    padding: 0;
+}
+
+/* Контрольные элементы */
+#controls {
+    margin-top: 20px;
+    padding: 20px;
+    background-color: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+body[data-obs-mode="true"] #controls,
+body[data-controls-hidden="true"] #controls {
+    display: none;
+}
+
+#controls h1 {
+    text-align: center;
+    margin-bottom: 20px;
+    color: #333;
+}
+
+.playlist-controls h3 {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+.input-group {
+    margin-bottom: 15px;
+}
+
+.input-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.input-group input[type="file"],
+.input-group input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+#playlist-url {
+    width: 70%;
+    margin-right: 10px;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+}
+
+.player-controls button {
+    padding: 10px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.player-controls button:hover {
+    background-color: #0056b3;
+}
+
+#current-video-info {
+    font-weight: bold;
+    color: #333;
+    flex-grow: 1;
+    text-align: center;
+}
+
+/* Редактор пропусков */
+.skip-controls {
+    margin: 20px 0;
+}
+
+.skip-editor-panel {
+    display: none;
+    margin-top: 15px;
+    padding: 15px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.skip-editor-panel.active {
+    display: block;
+}
+
+.skip-editor-panel h3 {
+    margin-bottom: 15px;
+    color: #555;
+}
+
+#skip-list {
+    margin-bottom: 15px;
+}
+
+.skip-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    background-color: #fff;
+    border: 1px solid #eee;
+    margin-bottom: 5px;
+    border-radius: 4px;
+}
+
+.skip-times {
+    font-family: monospace;
+    font-size: 14px;
+}
+
+.skip-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.skip-actions button {
+    padding: 5px 10px;
+    font-size: 12px;
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.skip-actions button.edit-btn {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.interface-controls {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.interface-controls button {
+    padding: 10px 15px;
+    background-color: #6c757d;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.interface-controls button:hover {
+    background-color: #545b62;
+}
+
+/* Скрытый курсор в режиме OBS */
+body[data-obs-mode="true"] #video-container {
+    cursor: none;
+}
+
+/* Модальное окно для добавления пропуска */
+.add-skip-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.add-skip-modal-content {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+}
+
+.add-skip-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.add-skip-form label {
+    font-weight: bold;
+}
+
+.add-skip-form input {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.add-skip-form-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.add-skip-form-buttons button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.add-skip-form-buttons .confirm-btn {
+    background-color: #28a745;
+    color: white;
+}
+
+.add-skip-form-buttons .cancel-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+/* Стили для режима без управления */
+body[data-controls-hidden="true"] #video-container {
+    cursor: none;
+}
