@@ -1,0 +1,10 @@
+[
+  {
+    "video": "videos/ep1.mp4",
+    "skipRanges": [[0, 12], [185, 200]]
+  },
+  {
+    "video": "videos/ep2.mp4",
+    "skipRanges": [[5, 20]]
+  }
+]
