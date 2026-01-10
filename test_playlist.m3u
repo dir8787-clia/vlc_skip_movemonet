@@ -1,0 +1,7 @@
+#EXTM3U
+#EXTINF:0,Тестовое видео 1
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4
+#EXTINF:0,Тестовое видео 2
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4
+#EXTINF:0,Тестовое видео 3
+https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4
