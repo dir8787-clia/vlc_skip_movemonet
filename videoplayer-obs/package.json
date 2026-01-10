@@ -1,0 +1,13 @@
+{
+  "name": "obs-videoplayer",
+  "version": "1.0.0",
+  "description": "Локальное веб-приложение для стриминга видео через OBS",
+  "main": "index.html",
+  "scripts": {
+    "start": "python -m http.server 8000",
+    "test": "echo \"No tests specified\" && exit 0"
+  },
+  "keywords": ["obs", "videoplayer", "streaming", "m3u", "playlist"],
+  "author": "OBS Videoplayer",
+  "license": "MIT"
+}
