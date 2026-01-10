@@ -1,0 +1,5 @@
+#EXTM3U
+#EXTINF:0,The.Rookie.S07E01.1080p.AMZN.WEB-DL.H.264.RGzsRutracker.mkv
+http://192.168.0.29:8090/stream/The.Rookie.S07E01.1080p.AMZN.WEB-DL.H.264.RGzsRutracker.mkv?link=80f9b1620dc2dae0c34e711c8c88f5d332efb0e8&index=1&play
+#EXTINF:0,The.Rookie.S07E02.1080p.AMZN.WEB-DL.H.264.RGzsRutracker.mkv
+http://192.168.0.29:8090/stream/The.Rookie.S07E02.1080p.AMZN.WEB-DL.H.264.RGzsRutracker.mkv?link=80f9b1620dc2dae0c34e711c8c88f5d332efb0e8&index=2&play

@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBS Видеоплеер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Контейнер для видео -->
+    <div id="video-container">
+        <video id="video-player" controls playsinline></video>
+        
+        <!-- Индикатор текущего видео -->
+        <div id="current-video-info">Выберите плейлист</div>
+        
+        <!-- Элементы управления (скрываются при ?clean=1) -->
+        <div id="controls" class="controls">
+            <button id="prev-btn" title="Предыдущее видео">◀ Предыдущее</button>
+            <button id="next-btn" title="Следующее видео">Следующее ▶</button>
+            <button id="load-playlist-btn" title="Загрузить плейлист">Загрузить плейлист</button>
+            
+            <!-- Скрытые инпуты для файлов -->
+            <input type="file" id="playlist-input" accept=".m3u,.m3u8" style="display: none;">
+            <input type="file" id="skip-rules-input" accept=".json" style="display: none;">
+        </div>
+    </div>
+
+    <script src="player.js"></script>
+</body>
+</html>
