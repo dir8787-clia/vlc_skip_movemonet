@@ -3,29 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OBS Видеоплеер</title>
+    <title>OBS Video Player</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Контейнер для видео -->
-    <div id="video-container">
+    <div id="main-container">
         <video id="video-player" controls playsinline></video>
         
-        <!-- Индикатор текущего видео -->
-        <div id="current-video-info">Выберите плейлист</div>
-        
-        <!-- Элементы управления (скрываются при ?clean=1) -->
+        <!-- Режим не для OBS -->
         <div id="controls" class="controls">
-            <button id="prev-btn" title="Предыдущее видео">◀ Предыдущее</button>
-            <button id="next-btn" title="Следующее видео">Следующее ▶</button>
-            <button id="load-playlist-btn" title="Загрузить плейлист">Загрузить плейлист</button>
+            <div class="playlist-controls">
+                <button id="load-local-btn">Загрузить локальный .m3u</button>
+                <input type="file" id="m3u-file-input" accept=".m3u,.m3u8" style="display: none;">
+                
+                <div class="url-load-section">
+                    <input type="text" id="m3u-url-input" placeholder="Введите URL плейлиста .m3u">
+                    <button id="load-url-btn">Загрузить по URL</button>
+                </div>
+            </div>
             
-            <!-- Скрытые инпуты для файлов -->
-            <input type="file" id="playlist-input" accept=".m3u,.m3u8" style="display: none;">
-            <input type="file" id="skip-rules-input" accept=".json" style="display: none;">
+            <div class="navigation-controls">
+                <button id="prev-btn">Предыдущее</button>
+                <span id="current-title" class="current-title">Видео не загружено</span>
+                <button id="next-btn">Следующее</button>
+            </div>
+            
+            <div class="skip-controls">
+                <button id="edit-skips-btn">Редактировать пропуски</button>
+                <button id="save-skips-btn">Сохранить правила как JSON</button>
+            </div>
         </div>
+        
+        <!-- Панель редактирования пропусков -->
+        <div id="skip-editor" class="skip-editor hidden">
+            <h3>Редактор пропусков для: <span id="editing-filename"></span></h3>
+            <div class="editor-controls">
+                <button id="add-skip-btn">Добавить пропуск</button>
+                <button id="close-editor-btn">Закрыть редактор</button>
+            </div>
+            <div class="current-time-info">
+                Текущее время: <span id="current-video-time">0:00</span>
+            </div>
+            <div id="skip-list" class="skip-list">
+                <!-- Список пропусков будет здесь -->
+            </div>
+        </div>
+        
+        <!-- Скрытое поле для загрузки файлов -->
+        <input type="file" id="skip-json-input" accept=".json" style="display: none;">
     </div>
-
+    
     <script src="player.js"></script>
 </body>
 </html>
