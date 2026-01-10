@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление видеоплеером</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        
+        .playlist-controls {
+            margin-bottom: 20px;
+        }
+        
+        .btn {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background-color: #45a049;
+        }
+        
+        .btn-secondary {
+            background-color: #2196F3;
+        }
+        
+        .btn-secondary:hover {
+            background-color: #1976D2;
+        }
+        
+        .btn-danger {
+            background-color: #f44336;
+        }
+        
+        .btn-danger:hover {
+            background-color: #d32f2f;
+        }
+        
+        .url-input-container {
+            margin: 15px 0;
+        }
+        
+        .url-input-container input {
+            width: 70%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        .playlist-list {
+            max-height: 300px;
+            overflow-y: auto;
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin: 10px 0;
+        }
+        
+        .playlist-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            cursor: pointer;
+        }
+        
+        .playlist-item:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .playlist-item.active {
+            background-color: #e3f2fd;
+        }
+        
+        .navigation {
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .current-video {
+            background-color: #e8f5e8;
+            padding: 10px;
+            border-radius: 4px;
+            margin: 10px 0;
+            text-align: center;
+        }
+        
+        .player-window-btn {
+            margin-top: 20px;
+            display: block;
+            width: 100%;
+            padding: 15px;
+            background-color: #FF9800;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        
+        .player-window-btn:hover {
+            background-color: #F57C00;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .skip-editor {
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            background-color: #fafafa;
+        }
+        
+        .skip-times {
+            margin: 10px 0;
+        }
+        
+        .skip-time-item {
+            padding: 5px;
+            background-color: #e8f4f8;
+            margin: 5px 0;
+            border-radius: 3px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .skip-controls {
+            margin: 10px 0;
+        }
+        
+        input[type="number"] {
+            width: 80px;
+            padding: 5px;
+            margin: 0 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Управление видеоплеером</h1>
+        
+        <div class="playlist-controls">
+            <button class="btn" onclick="loadLocalPlaylist()">Загрузить локальный плейлист</button>
+            <input type="file" id="localFileInput" accept=".m3u,.m3u8" style="display: none;" onchange="handleLocalFile(event)">
+            
+            <div class="url-input-container">
+                <input type="text" id="remoteUrlInput" placeholder="Введите URL плейлиста (например, http://192.168.0.29:8090/12.m3u)">
+                <button class="btn btn-secondary" onclick="loadRemotePlaylist()">Загрузить по URL</button>
+            </div>
+        </div>
+        
+        <div class="current-video" id="currentVideoInfo">
+            Плейлист не загружен
+        </div>
+        
+        <div class="navigation">
+            <button class="btn btn-secondary" onclick="previousVideo()" id="prevBtn" disabled>Предыдущее</button>
+            <button class="btn btn-secondary" onclick="nextVideo()" id="nextBtn" disabled>Следующее</button>
+        </div>
+        
+        <div class="playlist-list" id="playlistList">
+            <!-- Список видео будет здесь -->
+        </div>
+        
+        <button class="btn" onclick="openPlayerWindow()" id="openPlayerBtn" disabled>Открыть плеер в отдельном окне</button>
+        
+        <div class="skip-editor hidden" id="skipEditor">
+            <h3>Редактор пропусков</h3>
+            <div class="skip-controls">
+                <button class="btn btn-secondary" onclick="addSkipFromCurrentTime()">Добавить пропуск с текущей позиции</button>
+                <button class="btn" onclick="downloadSkipJson()">Сохранить как JSON</button>
+            </div>
+            <div class="skip-times" id="skipTimesList">
+                <!-- Список таймингов пропусков -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Глобальные переменные
+        let playlist = [];
+        let currentIndex = -1;
+        let playlistSource = null; // Имя файла или URL
+        let skipRules = {}; // Объект с правилами пропуска для каждого видео
+        
+        // Загрузка локального плейлиста
+        function loadLocalPlaylist() {
+            document.getElementById('localFileInput').click();
+        }
+        
+        async function handleLocalFile(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+            
+            const text = await file.text();
+            parseM3U(text);
+            playlistSource = file.name;
+            loadSkipRulesFromFile(file.name.replace('.m3u', '.skip.json'));
+        }
+        
+        // Загрузка плейлиста по URL
+        async function loadRemotePlaylist() {
+            const url = document.getElementById('remoteUrlInput').value.trim();
+            if (!url) {
+                alert('Пожалуйста, введите URL плейлиста');
+                return;
+            }
+            
+            try {
+                const response = await fetch(url);
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const text = await response.text();
+                parseM3U(text);
+                playlistSource = url;
+                
+                // Попробуем загрузить соответствующий файл пропусков
+                const skipUrl = url.replace('.m3u', '.skip.json');
+                loadSkipRulesFromUrl(skipUrl);
+            } catch (error) {
+                if (error.name === 'TypeError' && error.message.includes('CORS')) {
+                    alert('Ошибка CORS при загрузке плейлиста. Это может происходить из-за политики безопасности браузера. Попробуйте:\n1. Загрузить плейлист локально\n2. Запустить браузер с флагом --disable-web-security (только для разработки)\n3. Настроить CORS на сервере');
+                } else {
+                    alert('Ошибка загрузки плейлиста: ' + error.message);
+                }
+            }
+        }
+        
+        // Парсинг M3U файла
+        function parseM3U(text) {
+            const lines = text.split('\n');
+            playlist = [];
+            
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                
+                if (line.startsWith('#EXTINF:')) {
+                    const title = line.substring(line.indexOf(',') + 1);
+                    const url = lines[i + 1]?.trim();
+                    
+                    if (url) {
+                        playlist.push({
+                            title: title,
+                            url: url
+                        });
+                    }
+                }
+            }
+            
+            updatePlaylistDisplay();
+            enableButtons();
+        }
+        
+        // Отображение списка плейлиста
+        function updatePlaylistDisplay() {
+            const container = document.getElementById('playlistList');
+            container.innerHTML = '';
+            
+            playlist.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'playlist-item';
+                if (index === currentIndex) {
+                    div.classList.add('active');
+                }
+                div.textContent = item.title;
+                div.onclick = () => selectVideo(index);
+                container.appendChild(div);
+            });
+        }
+        
+        // Выбор видео из списка
+        function selectVideo(index) {
+            if (index >= 0 && index < playlist.length) {
+                currentIndex = index;
+                updateCurrentVideoInfo();
+                updatePlaylistDisplay();
+                syncToPlayer();
+            }
+        }
+        
+        // Обновление информации о текущем видео
+        function updateCurrentVideoInfo() {
+            const infoDiv = document.getElementById('currentVideoInfo');
+            if (currentIndex >= 0 && currentIndex < playlist.length) {
+                const item = playlist[currentIndex];
+                infoDiv.textContent = `Текущее: ${item.title}`;
+            } else {
+                infoDiv.textContent = 'Плейлист не загружен';
+            }
+        }
+        
+        // Навигация по плейлисту
+        function nextVideo() {
+            if (currentIndex < playlist.length - 1) {
+                currentIndex++;
+                updateCurrentVideoInfo();
+                updatePlaylistDisplay();
+                syncToPlayer();
+            }
+        }
+        
+        function previousVideo() {
+            if (currentIndex > 0) {
+                currentIndex--;
+                updateCurrentVideoInfo();
+                updatePlaylistDisplay();
+                syncToPlayer();
+            }
+        }
+        
+        // Включение/выключение кнопок
+        function enableButtons() {
+            document.getElementById('prevBtn').disabled = false;
+            document.getElementById('nextBtn').disabled = false;
+            document.getElementById('openPlayerBtn').disabled = false;
+        }
+        
+        // Синхронизация данных с плеером через localStorage
+        function syncToPlayer() {
+            if (currentIndex >= 0 && currentIndex < playlist.length) {
+                const currentVideo = playlist[currentIndex];
+                
+                // Сохраняем информацию в localStorage для синхронизации с плеером
+                const playerData = {
+                    index: currentIndex,
+                    title: currentVideo.title,
+                    url: currentVideo.url,
+                    skipRules: skipRules[currentVideo.title] || [],
+                    playlistSource: playlistSource
+                };
+                
+                localStorage.setItem('currentPlayerData', JSON.stringify(playerData));
+                
+                // Также отправляем событие для уведомления других вкладок
+                window.dispatchEvent(new CustomEvent('videoChanged', { detail: playerData }));
+            }
+        }
+        
+        // Открытие окна плеера
+        let playerWindow = null;
+        
+        function openPlayerWindow() {
+            if (playerWindow === null || playerWindow.closed) {
+                playerWindow = window.open('player.html', 'playerWindow', 'width=800,height=600');
+                
+                // Периодически проверяем, закрыто ли окно
+                const checkClosed = setInterval(() => {
+                    if (playerWindow.closed) {
+                        clearInterval(checkClosed);
+                        playerWindow = null;
+                    }
+                }, 1000);
+            } else {
+                playerWindow.focus();
+            }
+        }
+        
+        // Загрузка правил пропуска из локального файла
+        async function loadSkipRulesFromFile(filename) {
+            try {
+                const response = await fetch(filename);
+                if (response.ok) {
+                    const rules = await response.json();
+                    skipRules = {...rules};
+                    updateSkipEditor();
+                }
+            } catch (error) {
+                console.log('Файл пропусков не найден или ошибка:', error);
+                // Если файл не найден, продолжаем с пустыми правилами
+                skipRules = {};
+            }
+        }
+        
+        // Загрузка правил пропуска из URL
+        async function loadSkipRulesFromUrl(url) {
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    const rules = await response.json();
+                    skipRules = {...rules};
+                    updateSkipEditor();
+                }
+            } catch (error) {
+                console.log('Файл пропусков по URL не найден или ошибка:', error);
+                // Если файл не найден, продолжаем с пустыми правилами
+                skipRules = {};
+            }
+        }
+        
+        // Обновление редактора пропусков
+        function updateSkipEditor() {
+            const editor = document.getElementById('skipEditor');
+            const list = document.getElementById('skipTimesList');
+            
+            if (currentIndex >= 0 && currentIndex < playlist.length) {
+                const currentTitle = playlist[currentIndex].title;
+                const currentSkipRules = skipRules[currentTitle] || [];
+                
+                list.innerHTML = '';
+                
+                currentSkipRules.forEach((rule, idx) => {
+                    const ruleDiv = document.createElement('div');
+                    ruleDiv.className = 'skip-time-item';
+                    
+                    const startMin = Math.floor(rule[0] / 60);
+                    const startSec = Math.round(rule[0] % 60);
+                    const endMin = Math.floor(rule[1] / 60);
+                    const endSec = Math.round(rule[1] % 60);
+                    
+                    ruleDiv.innerHTML = `
+                        <span>${startMin}:${startSec.toString().padStart(2, '0')} – ${endMin}:${endSec.toString().padStart(2, '0')}</span>
+                        <div>
+                            <button class="btn btn-secondary btn-small" onclick="editSkipRule(${idx})">Изменить</button>
+                            <button class="btn btn-danger btn-small" onclick="removeSkipRule(${idx})">Удалить</button>
+                        </div>
+                    `;
+                    
+                    list.appendChild(ruleDiv);
+                });
+                
+                editor.classList.remove('hidden');
+            } else {
+                editor.classList.add('hidden');
+            }
+        }
+        
+        // Добавление пропуска с текущей позиции
+        function addSkipFromCurrentTime() {
+            if (currentIndex < 0 || currentIndex >= playlist.length) return;
+            
+            const currentTitle = playlist[currentIndex].title;
+            if (!skipRules[currentTitle]) {
+                skipRules[currentTitle] = [];
+            }
+            
+            // Получаем текущую позицию из плеера (если он открыт)
+            // В реальной реализации мы бы запросили у плеера currentTime
+            // Для упрощения используем текущее время + 15 секунд как пример
+            const startTime = getCurrentTimeFromPlayer() || 0;
+            const duration = 15; // по умолчанию 15 секунд
+            const endTime = startTime + duration;
+            
+            skipRules[currentTitle].push([startTime, endTime]);
+            updateSkipEditor();
+            saveSkipRulesToStorage();
+        }
+        
+        // Получение текущего времени из плеера (симуляция)
+        function getCurrentTimeFromPlayer() {
+            // В реальной реализации это будет взаимодействие с окном плеера
+            // Пока возвращаем 0 как заглушка
+            return 0;
+        }
+        
+        // Изменение правила пропуска
+        function editSkipRule(index) {
+            if (currentIndex < 0 || currentIndex >= playlist.length) return;
+            
+            const currentTitle = playlist[currentIndex].title;
+            const rules = skipRules[currentTitle];
+            
+            if (rules && index >= 0 && index < rules.length) {
+                const rule = rules[index];
+                
+                const newStart = prompt('Начало пропуска (в секундах):', rule[0]);
+                const newEnd = prompt('Конец пропуска (в секундах):', rule[1]);
+                
+                if (newStart !== null && newEnd !== null) {
+                    rules[index] = [parseFloat(newStart), parseFloat(newEnd)];
+                    updateSkipEditor();
+                    saveSkipRulesToStorage();
+                }
+            }
+        }
+        
+        // Удаление правила пропуска
+        function removeSkipRule(index) {
+            if (currentIndex < 0 || currentIndex >= playlist.length) return;
+            
+            const currentTitle = playlist[currentIndex].title;
+            const rules = skipRules[currentTitle];
+            
+            if (rules && index >= 0 && index < rules.length) {
+                rules.splice(index, 1);
+                updateSkipEditor();
+                saveSkipRulesToStorage();
+            }
+        }
+        
+        // Сохранение правил в localStorage
+        function saveSkipRulesToStorage() {
+            if (playlistSource) {
+                const key = `skipRules_${playlistSource}`;
+                localStorage.setItem(key, JSON.stringify(skipRules));
+            }
+        }
+        
+        // Загрузка правил из localStorage при старте
+        function loadSkipRulesFromStorage() {
+            if (playlistSource) {
+                const key = `skipRules_${playlistSource}`;
+                const saved = localStorage.getItem(key);
+                if (saved) {
+                    try {
+                        skipRules = JSON.parse(saved);
+                    } catch (e) {
+                        console.error('Ошибка парсинга сохраненных правил пропуска:', e);
+                        skipRules = {};
+                    }
+                } else {
+                    skipRules = {};
+                }
+            }
+        }
+        
+        // Скачивание JSON файла с правилами
+        function downloadSkipJson() {
+            if (!playlistSource) return;
+            
+            const filename = playlistSource.replace('.m3u', '.skip.json').replace(/.*\//, '');
+            const dataStr = JSON.stringify(skipRules, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const link = document.createElement('a');
+            link.setAttribute('href', dataUri);
+            link.setAttribute('download', filename);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+        
+        // Обработка события изменения видео
+        window.addEventListener('videoChanged', (event) => {
+            updateSkipEditor();
+        });
+        
+        // Слушатель хранилища для получения обновлений от других вкладок
+        window.addEventListener('storage', (event) => {
+            if (event.key === 'currentPlayerData') {
+                // Обновляем UI при изменении данных в другом окне
+            }
+        });
+        
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', () => {
+            // Загружаем правила пропуска из localStorage, если они были сохранены ранее
+            // Это произойдет, когда пользователь вернется к плейлисту
+        });
+    </script>
+</body>
+</html>
