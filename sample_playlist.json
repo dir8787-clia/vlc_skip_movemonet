@@ -1,0 +1,25 @@
+[
+  {
+    "videoPath": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+    "skipRanges": [
+      [0, 15],
+      [150, 165],
+      [300, 315]
+    ]
+  },
+  {
+    "videoPath": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
+    "skipRanges": [
+      [10, 25],
+      [100, 115]
+    ]
+  },
+  {
+    "videoPath": "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+    "skipRanges": [
+      [5, 20],
+      [45, 60],
+      [120, 135]
+    ]
+  }
+]
