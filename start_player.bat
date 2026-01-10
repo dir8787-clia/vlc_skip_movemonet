@@ -1,28 +1,23 @@
 @echo off
-echo Starting Video Player...
-cd /d "%~dp0"
+chcp 65001 >nul 2>&1
+echo Видеоплеер с автопропуском
+echo ===========================
+echo Проверка наличия Python...
 
-REM Check if Python is available
 python --version >nul 2>&1
 if errorlevel 1 (
-    echo Python is not found. Please install Python first.
+    echo.
+    echo ОШИБКА: Python не найден в системе.
+    echo Убедитесь, что Python установлен и добавлен в PATH.
+    echo.
+    echo Скачайте Python с официального сайта: https://www.python.org/downloads/
     pause
     exit /b 1
 )
 
-REM Start the HTTP server in the background
-start /min python -m http.server 8000
+echo Python найден. Запуск сервера...
+echo.
 
-REM Wait a moment for the server to start
-timeout /t 2 /nobreak >nul
+python server.py
 
-REM Open the player in the default browser
-start http://localhost:8000/player.html
-
-echo Video player started successfully!
-echo Server running on http://localhost:8000
-echo Press any key to stop the server...
-pause >nul
-
-REM Kill the server process (this is basic - in production you might want something more robust)
-taskkill /f /im python.exe 2>nul
+pause
