@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OBS Видеоплеер</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="container">
+        <video id="videoPlayer" controls></video>
+        
+        <div id="controls">
+            <div class="control-group">
+                <label for="playlistFile">Загрузить локальный .m3u:</label>
+                <input type="file" id="playlistFile" accept=".m3u,.m3u8">
+            </div>
+            
+            <div class="control-group">
+                <label for="playlistUrl">Загрузить по ссылке:</label>
+                <input type="text" id="playlistUrl" placeholder="Введите URL плейлиста .m3u">
+                <button id="loadFromUrlBtn">Загрузить по ссылке</button>
+            </div>
+            
+            <div class="control-group">
+                <button id="prevBtn">Предыдущее</button>
+                <button id="nextBtn">Следующее</button>
+                <button id="toggleControlsBtn">Скрыть управление</button>
+                <button id="editSkipBtn">Редактировать пропуски</button>
+            </div>
+            
+            <div id="currentTrackInfo">
+                <span id="trackTitle">Выберите плейлист</span>
+            </div>
+        </div>
+        
+        <div id="skipEditor" class="editor-panel">
+            <h3>Редактор пропусков</h3>
+            <div id="skipList"></div>
+            <div class="add-skip-controls">
+                <button id="addSkipBtn">Добавить пропуск с текущей позиции</button>
+                <input type="number" id="skipDuration" placeholder="Длительность (сек)" min="0" step="0.1">
+                <button id="saveSkipRulesBtn">Сохранить как JSON-файл</button>
+            </div>
+            <button id="closeEditorBtn">Закрыть редактор</button>
+        </div>
+    </div>
+    
+    <script src="player.js"></script>
+</body>
+</html>

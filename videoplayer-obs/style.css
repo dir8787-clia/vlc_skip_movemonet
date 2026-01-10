@@ -1,0 +1,246 @@
+/* Сброс стандартных стилей */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #000;
+    color: white;
+    overflow: hidden; /* Убираем полосы прокрутки */
+}
+
+#container {
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+}
+
+/* Стили для видео */
+#videoPlayer {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+/* Скрытый режим - скрываем курсор */
+body.hidden-controls {
+    cursor: none;
+}
+
+body.hidden-controls #controls {
+    display: none !important;
+}
+
+/* Панель управления */
+#controls {
+    position: absolute;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(0, 0, 0, 0.7);
+    padding: 15px;
+    border-radius: 10px;
+    z-index: 100;
+    max-width: 90%;
+    width: 800px;
+}
+
+.control-group {
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.control-group label {
+    min-width: 180px;
+}
+
+.control-group input[type="text"],
+.control-group input[type="number"],
+.control-group input[type="file"] {
+    flex-grow: 1;
+    padding: 5px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #333;
+    color: white;
+}
+
+button {
+    padding: 8px 15px;
+    border: none;
+    border-radius: 4px;
+    background-color: #4CAF50;
+    color: white;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+button:hover {
+    background-color: #45a049;
+}
+
+#prevBtn, #nextBtn {
+    background-color: #2196F3;
+}
+
+#prevBtn:hover, #nextBtn:hover {
+    background-color: #1976D2;
+}
+
+#toggleControlsBtn {
+    background-color: #FF9800;
+}
+
+#toggleControlsBtn:hover {
+    background-color: #F57C00;
+}
+
+#editSkipBtn {
+    background-color: #9C27B0;
+}
+
+#editSkipBtn:hover {
+    background-color: #7B1FA2;
+}
+
+#loadFromUrlBtn {
+    background-color: #FF5722;
+}
+
+#loadFromUrlBtn:hover {
+    background-color: #E64A19;
+}
+
+#currentTrackInfo {
+    margin-top: 10px;
+    text-align: center;
+    font-size: 16px;
+    word-break: break-word;
+}
+
+/* Панель редактора пропусков */
+.editor-panel {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 80%;
+    max-width: 600px;
+    background-color: rgba(0, 0, 0, 0.9);
+    border: 2px solid #4CAF50;
+    border-radius: 10px;
+    padding: 20px;
+    z-index: 200;
+    display: none;
+}
+
+.editor-panel h3 {
+    margin-bottom: 15px;
+    color: #4CAF50;
+    text-align: center;
+}
+
+#skipList {
+    max-height: 200px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+    background-color: #222;
+    padding: 10px;
+    border-radius: 5px;
+}
+
+.skip-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px;
+    margin-bottom: 5px;
+    background-color: #333;
+    border-radius: 4px;
+}
+
+.skip-item button {
+    padding: 4px 8px;
+    font-size: 12px;
+    margin-left: 5px;
+}
+
+.delete-skip-btn {
+    background-color: #f44336;
+}
+
+.delete-skip-btn:hover {
+    background-color: #d32f2f;
+}
+
+.edit-skip-btn {
+    background-color: #FF9800;
+}
+
+.edit-skip-btn:hover {
+    background-color: #F57C00;
+}
+
+.add-skip-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.add-skip-controls input {
+    padding: 8px;
+    border-radius: 4px;
+    border: 1px solid #ccc;
+    background-color: #333;
+    color: white;
+}
+
+.add-skip-controls button {
+    align-self: flex-start;
+}
+
+/* Режим для OBS */
+body.obs-mode {
+    margin: 0;
+    overflow: hidden;
+    background-color: black;
+}
+
+body.obs-mode #controls {
+    display: none !important;
+}
+
+body.obs-mode #videoPlayer {
+    width: 100vw;
+    height: 100vh;
+    object-fit: contain;
+}
+
+body.obs-mode {
+    cursor: none;
+}
+
+/* Адаптивность */
+@media (max-width: 768px) {
+    #controls {
+        width: 95%;
+        padding: 10px;
+    }
+    
+    .control-group {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .control-group label {
+        min-width: auto;
+    }
+}
